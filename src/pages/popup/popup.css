@@ -1,0 +1,141 @@
+.popup {
+  inline-size: 380px;
+  min-block-size: 300px;
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.popup-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mark {
+  display: grid;
+  place-content: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent) 10%, var(--accent-strong));
+  box-shadow: var(--shadow);
+}
+
+.popup-head h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+
+.icon-link {
+  display: grid;
+  place-content: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: var(--radius-s);
+  color: var(--ink-soft);
+}
+
+.icon-link:hover {
+  color: var(--ink);
+  background: var(--bg-sunken);
+}
+
+#submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.state-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding-block: 24px;
+}
+
+.state-view[hidden] {
+  display: none;
+}
+
+.state-view h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.state-view p {
+  margin: 0 0 8px;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.spinner {
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result-icon {
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.result-icon.ok {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.result-icon.ok::before {
+  content: "✓";
+}
+
+.result-icon.err {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.result-icon.err::before {
+  content: "!";
+}
+
+#result-link {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+    border-top-color: var(--ink-faint);
+  }
+}

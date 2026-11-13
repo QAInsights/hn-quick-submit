@@ -1,0 +1,241 @@
+.page {
+  max-inline-size: 560px;
+  margin-inline: auto;
+  padding: 32px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-block-end: 8px;
+}
+
+.mark {
+  display: grid;
+  place-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent) 10%, var(--accent-strong));
+  box-shadow: var(--shadow);
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-head .sub {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.account .who {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.account .actions {
+  display: flex;
+  gap: 12px;
+  margin-inline-start: auto;
+}
+
+.badge {
+  display: inline-block;
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.badge.on {
+  background: var(--ok);
+}
+
+.badge.off {
+  background: var(--ink-faint);
+}
+
+.spinner-sm {
+  inline-size: 18px;
+  block-size: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.choice-list {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  background: var(--bg);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.choice:hover {
+  border-color: var(--line-strong);
+}
+
+.choice:has(:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.choice input {
+  margin-block-start: 3px;
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: var(--accent);
+}
+
+.choice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.choice-title {
+  font-weight: 600;
+}
+
+.choice-desc {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.segmented {
+  border: 0;
+  margin: 0;
+  padding: 4px;
+  display: inline-flex;
+  gap: 4px;
+  background: var(--bg-sunken);
+  border-radius: 999px;
+}
+
+.segmented label {
+  cursor: pointer;
+}
+
+.segmented input {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+.segmented span {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.segmented input:checked + span {
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent) 10%, var(--accent-strong));
+  box-shadow: var(--shadow);
+}
+
+.segmented input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.about-copy {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-block-end: 16px;
+}
+
+.btn-donate {
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent) 10%, var(--accent-strong));
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  inline-size: fit-content;
+}
+
+.btn-donate:hover {
+  filter: brightness(1.06);
+  color: var(--accent-ink);
+}

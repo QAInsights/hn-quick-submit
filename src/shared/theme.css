@@ -1,0 +1,256 @@
+/* HN Quick Submit design tokens — "ember" theme.
+   Warm paper surfaces, ink text, and a Hacker-News-orange accent,
+   resolved per color-scheme with a media-query fallback (Chrome <123
+   lacks light-dark()); a pinned <meta name="color-scheme"> overrides. */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f7f2ea;
+  --bg-raised: #fffdf7;
+  --bg-sunken: #efe8db;
+  --ink: #211a12;
+  --ink-soft: #6b6154;
+  --ink-faint: #96897a;
+  --line: #e4dac8;
+  --line-strong: #d2c5ae;
+  --accent: #d5540a;
+  --accent-strong: #b84308;
+  --accent-ink: #fff7ee;
+  --accent-soft: #fbe7d7;
+  --danger: #b3261e;
+  --danger-soft: #fdeceb;
+  --ok: #2e7d32;
+  --ok-soft: #e6f4e7;
+  --focus: #e8660f;
+  --shadow: 0 1px 2px rgb(50 33 8 / 6%), 0 8px 24px rgb(50 33 8 / 8%);
+
+  accent-color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16130f;
+    --bg-raised: #1f1a15;
+    --bg-sunken: #100d0a;
+    --ink: #f0e9dd;
+    --ink-soft: #b3a795;
+    --ink-faint: #7d7363;
+    --line: #33291d;
+    --line-strong: #4a3c2a;
+    --accent: #ff7a29;
+    --accent-strong: #ff9a52;
+    --accent-ink: #241203;
+    --accent-soft: #3a2110;
+    --danger: #ff8f86;
+    --danger-soft: #3a1a17;
+    --ok: #7bd88a;
+    --ok-soft: #16291a;
+    --focus: #ff8a3d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 45%);
+  }
+}
+
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  --bg: #f7f2ea;
+  --bg-raised: #fffdf7;
+  --bg-sunken: #efe8db;
+  --ink: #211a12;
+  --ink-soft: #6b6154;
+  --ink-faint: #96897a;
+  --line: #e4dac8;
+  --line-strong: #d2c5ae;
+  --accent: #d5540a;
+  --accent-strong: #b84308;
+  --accent-ink: #fff7ee;
+  --accent-soft: #fbe7d7;
+  --danger: #b3261e;
+  --danger-soft: #fdeceb;
+  --ok: #2e7d32;
+  --ok-soft: #e6f4e7;
+  --focus: #e8660f;
+  --shadow: 0 1px 2px rgb(50 33 8 / 6%), 0 8px 24px rgb(50 33 8 / 8%);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  --bg: #16130f;
+  --bg-raised: #1f1a15;
+  --bg-sunken: #100d0a;
+  --ink: #f0e9dd;
+  --ink-soft: #b3a795;
+  --ink-faint: #7d7363;
+  --line: #33291d;
+  --line-strong: #4a3c2a;
+  --accent: #ff7a29;
+  --accent-strong: #ff9a52;
+  --accent-ink: #241203;
+  --accent-soft: #3a2110;
+  --danger: #ff8f86;
+  --danger-soft: #3a1a17;
+  --ok: #7bd88a;
+  --ok-soft: #16291a;
+  --focus: #ff8a3d;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 45%);
+}
+
+:root {
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--accent-strong);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field input[type="text"],
+.field input[type="url"],
+.field textarea {
+  font: inherit;
+  font-size: max(1rem, 1em);
+  color: var(--ink);
+  background: var(--bg-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  padding: 10px 12px;
+  min-height: 42px;
+}
+
+.field input[type="text"]:focus,
+.field input[type="url"]:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.field .mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.field .hint {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.field :user-invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--radius-m);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.btn-primary {
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent) 10%, var(--accent-strong));
+  box-shadow: var(--shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.btn-ghost {
+  color: var(--ink);
+  background: var(--bg-raised);
+  border-color: var(--line-strong);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-sunken);
+}
+
+.btn-block {
+  inline-size: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}

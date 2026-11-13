@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <script src="/theme-boot.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HN Quick Submit — Settings</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <span class="mark" aria-hidden="true">Y</span>
+        <div>
+          <h1>HN Quick Submit</h1>
+          <p class="sub">Settings</p>
+        </div>
+      </header>
+
+      <section class="card" aria-labelledby="account-h">
+        <h2 id="account-h">Account</h2>
+        <div class="account" id="account-status">
+          <div class="spinner-sm" aria-hidden="true"></div>
+          <p>Checking Hacker News session…</p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="submit-h">
+        <h2 id="submit-h">Submission</h2>
+        <fieldset class="choice-list">
+          <legend class="visually-hidden">How submissions are posted</legend>
+          <label class="choice">
+            <input type="radio" name="submitMode" value="confirm">
+            <span class="choice-body">
+              <span class="choice-title">Ask me to confirm</span>
+              <span class="choice-desc">
+                Right-click opens a prefilled window; the toolbar icon opens the
+                form. Nothing posts until you press Submit.
+              </span>
+            </span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="submitMode" value="instant">
+            <span class="choice-body">
+              <span class="choice-title">Submit immediately</span>
+              <span class="choice-desc">
+                Right-click posts at once and shows a notification. The toolbar
+                icon submits the current page as soon as it opens.
+              </span>
+            </span>
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="card" aria-labelledby="appearance-h">
+        <h2 id="appearance-h">Appearance</h2>
+        <fieldset class="segmented">
+          <legend class="visually-hidden">Theme</legend>
+          <label>
+            <input type="radio" name="theme" value="system">
+            <span>System</span>
+          </label>
+          <label>
+            <input type="radio" name="theme" value="light">
+            <span>Light</span>
+          </label>
+          <label>
+            <input type="radio" name="theme" value="dark">
+            <span>Dark</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="card" aria-labelledby="about-h">
+        <h2 id="about-h">About</h2>
+        <p class="about-copy">
+          HN Quick Submit <span id="version"></span> — post links to Hacker News
+          in one click, from the toolbar or the right-click menu.
+        </p>
+        <div class="about-links">
+          <a href="https://news.ycombinator.com" target="_blank" rel="noopener">
+            Hacker News
+          </a>
+          <a
+            href="https://github.com/QAInsights/hn-quick-submit"
+            target="_blank"
+            rel="noopener"
+          >
+            Source code
+          </a>
+          <a
+            href="https://github.com/QAInsights/hn-quick-submit/issues"
+            target="_blank"
+            rel="noopener"
+          >
+            Report an issue
+          </a>
+        </div>
+        <a
+          class="btn btn-donate"
+          href="https://www.buymeacoffee.com/qainsights"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M20 3H4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-1h1a2 2 0 0 0 0-4h-1V3ZM4 19h16v2H4v-2Z"
+            />
+          </svg>
+          Buy me a coffee
+        </a>
+      </section>
+    </main>
+    <script type="module" src="./settings.ts"></script>
+  </body>
+</html>
