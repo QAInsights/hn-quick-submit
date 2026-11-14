@@ -131,13 +131,17 @@ async function main(): Promise<void> {
     return;
   }
 
-  titleInput.addEventListener("input", () => {
-    const over = titleInput.value.length > 80;
+  const TITLE_LIMIT = 80;
+  const updateTitleHint = () => {
+    const len = titleInput.value.length;
+    const over = len > TITLE_LIMIT;
     titleHint.textContent = over
-      ? `HN trims titles around 80 characters — yours is ${titleInput.value.length}.`
-      : "HN trims titles around 80 characters.";
+      ? `${len} / ${TITLE_LIMIT} — HN rejects titles this long.`
+      : `${len} / ${TITLE_LIMIT}`;
     titleHint.style.color = over ? "var(--danger)" : "";
-  });
+  };
+  titleInput.addEventListener("input", updateTitleHint);
+  updateTitleHint();
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -148,6 +152,15 @@ async function main(): Promise<void> {
     };
     if (!input.title) {
       titleInput.setCustomValidity("HN requires a title.");
+      titleInput.reportValidity();
+      titleInput.focus();
+      titleInput.setCustomValidity("");
+      return;
+    }
+    if (input.title.length > TITLE_LIMIT) {
+      titleInput.setCustomValidity(
+        `HN rejects titles over ${TITLE_LIMIT} characters — yours is ${input.title.length}.`,
+      );
       titleInput.reportValidity();
       titleInput.focus();
       titleInput.setCustomValidity("");

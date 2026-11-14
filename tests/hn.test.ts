@@ -65,4 +65,23 @@ describe("parseSubmitResult", () => {
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.detail).toContain("title can't be blank");
   });
+  it("treats an fnop bounce as a rejection, not a success link", () => {
+    const r = parseSubmitResult(
+      "https://news.ycombinator.com/x?fnid=BfpNnD6wdUBUiVhyEMnY0a&fnop=toolong-title",
+      "",
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.reason).toBe("hn-error");
+      expect(r.detail).toContain("80 characters");
+    }
+  });
+  it("falls back to the page text for unknown fnop codes", () => {
+    const r = parseSubmitResult(
+      "https://news.ycombinator.com/x?fnid=xyz&fnop=some-new-error",
+      "<body>unknown problem</body>",
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.detail).toContain("unknown problem");
+  });
 });

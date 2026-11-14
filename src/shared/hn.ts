@@ -41,10 +41,22 @@ function stripTags(html: string): string {
     .trim();
 }
 
+/** HN bounces rejected submissions to /x?fnid=…&fnop=<reason-code>. */
+const FNOP_ERRORS: Record<string, string> = {
+  "toolong-title": "Title is too long — HN's limit is 80 characters.",
+  "blank": "HN needs a title and a URL or text.",
+  "bad-url": "HN could not use that URL.",
+  toofast: "You are submitting too fast — try again in a moment.",
+  throttled: "HN is rate limiting new submissions — try again later.",
+  banned: "This site cannot be submitted to Hacker News.",
+  dead: "HN flagged this link as dead.",
+};
+
 /**
  * Interprets the response of POST /r. HN answers a real submission with a
  * redirect to the new (or previously submitted) item, or to a listing page;
- * failures come back as a short plain error page on /r itself.
+ * failures come back as a short plain error page on /r itself, or bounce to
+ * /x with an fnop reason code.
  */
 export function parseSubmitResult(
   finalUrl: string,
@@ -58,7 +70,19 @@ export function parseSubmitResult(
       duplicate: true,
     };
   }
-  const path = new URL(finalUrl).pathname;
+  const parsed = new URL(finalUrl);
+  const errorOp = parsed.searchParams.get("fnop");
+  if (errorOp && errorOp !== "submit-page") {
+    return {
+      ok: false,
+      reason: "hn-error",
+      detail:
+        FNOP_ERRORS[errorOp] ??
+        (stripTags(bodyHtml).slice(0, 240) ||
+          `Hacker News rejected the submission (${errorOp}).`),
+    };
+  }
+  const path = parsed.pathname;
   if (path !== "/r" && !path.startsWith("/submit")) {
     // Redirected to /newest, /news, etc.: the post went through but HN did not
     // hand back the item id.
@@ -80,6 +104,14 @@ export async function getLoginStatus(): Promise<LoginStatus> {
 }
 
 export async function submitStory(input: SubmitInput): Promise<SubmitResult> {
+  if (input.title.length > 80) {
+    return {
+      ok: false,
+      reason: "hn-error",
+      detail: "Title is too long — HN's limit is 80 characters.",
+    };
+  }
+
   let fnid: string | null = null;
   try {
     const formRes = await fetch(HN_SUBMIT_URL, { credentials: "include" });
