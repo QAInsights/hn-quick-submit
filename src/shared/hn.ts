@@ -104,7 +104,10 @@ export async function getLoginStatus(): Promise<LoginStatus> {
 }
 
 export async function submitStory(input: SubmitInput): Promise<SubmitResult> {
-  if (input.title.length > 80) {
+  const prepared = prepareSubmission(input.url, input.title);
+  const title = prepared.title;
+  const url = prepared.url;
+  if (title.length > 80) {
     return {
       ok: false,
       reason: "hn-error",
@@ -133,8 +136,8 @@ export async function submitStory(input: SubmitInput): Promise<SubmitResult> {
   const body = new URLSearchParams({
     fnid,
     fnop: "submit-page",
-    title: input.title,
-    url: input.url,
+    title,
+    url,
     text: input.text,
   });
   try {
@@ -161,4 +164,117 @@ export async function submitStory(input: SubmitInput): Promise<SubmitResult> {
 /** Official bookmarklet endpoint: opens HN's own form prefilled. */
 export function submitLinkFallbackUrl(url: string, title: string): string {
   return `${HN_ORIGIN}/submitlink?u=${encodeURIComponent(url)}&t=${encodeURIComponent(title)}`;
+}
+
+const TRACKER_PARAMS =
+  /^(utm_[a-z0-9_]+|fbclid|gclid|dclid|gbraid|wbraid|mc_cid|mc_eid|igshid|si|spm|vero_id|wickedid|mibextid|_ga|_gl|oly_anon_id|oly_enc_id)$/i;
+
+/** Canonicalizes a URL for submission: drops tracking params and scroll anchors. */
+export function cleanSubmitUrl(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    for (const key of [...u.searchParams.keys()]) {
+      if (TRACKER_PARAMS.test(key)) u.searchParams.delete(key);
+    }
+    if (u.hash.includes(":~:")) u.hash = "";
+    return u.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+const GENERIC_TLDS = new Set([
+  "com", "org", "net", "io", "dev", "co", "app", "edu", "gov", "ai",
+  "me", "info", "site", "uk", "us", "de", "fr", "jp", "in", "au", "ca",
+]);
+const SITEISH_SUFFIX =
+  /\b(blog|news|docs?|documentation|technical|official|journal|magazine|press|media|labs?|research|engineering|medium|substack|github)\b/i;
+
+/**
+ * HN asks that titles not include the site name (it is shown next to the
+ * link). Strips a trailing "| Site" / "- Site" segment when it names the
+ * host or reads like a publication label. Conservative: unrelated suffixes
+ * are kept.
+ */
+export function stripSiteName(title: string, pageUrl: string): string {
+  let labels: string[] = [];
+  try {
+    labels = new URL(pageUrl).hostname
+      .replace(/^www\./, "")
+      .split(".")
+      .filter((l) => l.length >= 3 && !GENERIC_TLDS.has(l.toLowerCase()))
+      .map((l) => l.toLowerCase());
+  } catch {
+    /* keep the title as-is */
+  }
+  let t = title.trim();
+  for (let i = 0; i < 3; i++) {
+    const m = /^(.*)\s+[|\uFF5C\u2013\u2014\u2015-]\s+(.+)$/.exec(t);
+    if (!m) break;
+    const last = m[2];
+    const isSiteName =
+      last.length <= 50 &&
+      (labels.some((l) => last.toLowerCase().includes(l)) ||
+        SITEISH_SUFFIX.test(last));
+    if (!isSiteName) break;
+    t = m[1].trim();
+  }
+  return t || title;
+}
+
+/** HN asks that videos and PDFs be flagged in the title. */
+export function mediaTagFor(rawUrl: string): "[pdf]" | "[video]" | null {
+  try {
+    const u = new URL(rawUrl);
+    const path = u.pathname.toLowerCase();
+    const host = u.hostname.replace(/^(www|m)\./, "");
+    if (
+      path.endsWith(".pdf") ||
+      (host === "arxiv.org" && path.startsWith("/pdf/"))
+    ) {
+      return "[pdf]";
+    }
+    if (
+      (host === "youtube.com" && /^\/(watch|shorts|clip)/.test(path)) ||
+      (host === "youtu.be" && path.length > 1) ||
+      (host === "vimeo.com" && /^\/\d/.test(path))
+    ) {
+      return "[video]";
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export interface PreparedSubmission {
+  url: string;
+  title: string;
+  notes: string[];
+}
+
+/** Applies HN's submission rules: canonical URL, site-name-free title, media tags. */
+export function prepareSubmission(
+  rawUrl: string,
+  rawTitle: string,
+): PreparedSubmission {
+  const notes: string[] = [];
+  const url = cleanSubmitUrl(rawUrl);
+  if (url !== rawUrl) notes.push("removed tracking parameters");
+
+  let title = rawTitle.trim().replace(/\s+/g, " ");
+  const stripped = stripSiteName(title, url || rawUrl);
+  if (stripped && stripped !== title) {
+    title = stripped;
+    notes.push("removed the site name");
+  }
+
+  const tag = mediaTagFor(url);
+  if (tag && !title.toLowerCase().includes(tag)) {
+    const room = 80 - tag.length - 2; // " [tag]" plus the ellipsis
+    title = title.length > room ? `${title.slice(0, room).trimEnd()}\u2026` : title;
+    title = `${title} ${tag}`;
+    notes.push(`added ${tag}`);
+  }
+  return { url, title, notes };
 }

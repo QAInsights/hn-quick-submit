@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  cleanSubmitUrl,
+  mediaTagFor,
   parseFnid,
   parseSubmitResult,
   parseUsername,
+  prepareSubmission,
+  stripSiteName,
 } from "../src/shared/hn";
 
 const SUBMIT_FORM_HTML = `
@@ -83,5 +87,82 @@ describe("parseSubmitResult", () => {
     );
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.detail).toContain("unknown problem");
+  });
+});
+
+describe("cleanSubmitUrl", () => {
+  it("drops tracking params but keeps real ones", () => {
+    expect(
+      cleanSubmitUrl(
+        "https://example.com/a?id=42&utm_source=x&fbclid=abc&si=trk",
+      ),
+    ).toBe("https://example.com/a?id=42");
+  });
+  it("drops scroll-to-text fragments", () => {
+    expect(cleanSubmitUrl("https://example.com/a#:~:text=hello")).toBe(
+      "https://example.com/a",
+    );
+  });
+  it("returns the input when unparseable", () => {
+    expect(cleanSubmitUrl("not a url")).toBe("not a url");
+  });
+});
+
+describe("stripSiteName", () => {
+  const nvidia = "https://developer.nvidia.com/blog/x/";
+  it("removes a host-matching site suffix", () => {
+    expect(
+      stripSiteName(
+        "Faster Scientific Simulations with New FP64 Algorithms in NVIDIA cuBLAS | NVIDIA Technical Blog",
+        nvidia,
+      ),
+    ).toBe(
+      "Faster Scientific Simulations with New FP64 Algorithms in NVIDIA cuBLAS",
+    );
+  });
+  it("removes generic publication suffixes", () => {
+    expect(stripSiteName("Some Post - Medium", "https://medium.com/p/x")).toBe(
+      "Some Post",
+    );
+  });
+  it("keeps unrelated suffixes", () => {
+    const t = "State of the art - a survey";
+    expect(stripSiteName(t, "https://example.com")).toBe(t);
+  });
+});
+
+describe("mediaTagFor", () => {
+  it("tags PDFs", () => {
+    expect(mediaTagFor("https://arxiv.org/pdf/2401.12345")).toBe("[pdf]");
+    expect(mediaTagFor("https://x.com/paper.pdf")).toBe("[pdf]");
+  });
+  it("tags videos", () => {
+    expect(mediaTagFor("https://www.youtube.com/watch?v=abc")).toBe("[video]");
+    expect(mediaTagFor("https://youtu.be/abc")).toBe("[video]");
+    expect(mediaTagFor("https://vimeo.com/123456")).toBe("[video]");
+  });
+  it("returns null for plain pages", () => {
+    expect(mediaTagFor("https://example.com/post")).toBeNull();
+  });
+});
+
+describe("prepareSubmission", () => {
+  it("cleans a tracked URL and sitesuffixed title in one pass", () => {
+    const r = prepareSubmission(
+      "https://developer.nvidia.com/blog/x/?utm_campaign=y",
+      "Faster Scientific Simulations with New FP64 Algorithms in NVIDIA cuBLAS | NVIDIA Technical Blog",
+    );
+    expect(r.url).toBe("https://developer.nvidia.com/blog/x/");
+    expect(r.title.length).toBeLessThanOrEqual(80);
+    expect(r.notes).toContain("removed tracking parameters");
+    expect(r.notes).toContain("removed the site name");
+  });
+  it("appends the media tag and keeps the title within 80 chars", () => {
+    const r = prepareSubmission(
+      "https://arxiv.org/pdf/2401.12345",
+      "A very long paper title that would exceed eighty characters if the tag were appended on",
+    );
+    expect(r.title.endsWith("[pdf]")).toBe(true);
+    expect(r.title.length).toBeLessThanOrEqual(80);
   });
 });

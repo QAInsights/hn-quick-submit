@@ -1,6 +1,7 @@
 import {
   HN_LOGIN_URL,
   getLoginStatus,
+  prepareSubmission,
   submitLinkFallbackUrl,
   submitStory,
   type SubmitInput,
@@ -31,6 +32,7 @@ interface DraftSubmission {
   url: string;
   title: string;
   comment: string;
+  notes: string[];
 }
 
 function draftFromContext(
@@ -38,16 +40,26 @@ function draftFromContext(
   tab: chrome.tabs.Tab | undefined,
 ): DraftSubmission {
   if (info.menuItemId === "hqs-link" && info.linkUrl) {
+    const prepared = prepareSubmission(
+      info.linkUrl,
+      new URL(info.linkUrl).hostname,
+    );
     return {
-      url: info.linkUrl,
-      title: new URL(info.linkUrl).hostname,
+      url: prepared.url,
+      title: prepared.title,
       comment: "",
+      notes: prepared.notes,
     };
   }
+  const prepared = prepareSubmission(
+    info.pageUrl ?? tab?.url ?? "",
+    tab?.title ?? "",
+  );
   return {
-    url: info.pageUrl ?? tab?.url ?? "",
-    title: tab?.title ?? "",
+    url: prepared.url,
+    title: prepared.title,
     comment: info.selectionText ?? "",
+    notes: prepared.notes,
   };
 }
 
@@ -61,6 +73,7 @@ async function openConfirmWindow(draft: DraftSubmission): Promise<void> {
     c: draft.comment,
     confirm: "1",
   });
+  if (draft.notes.length) params.set("n", draft.notes.join(", "));
   const parent = await chrome.windows.getLastFocused();
   const left =
     parent.left != null && parent.width != null

@@ -6,6 +6,7 @@ import "./popup.css";
 import { getSettings, initTheme } from "../../shared/settings";
 import {
   HN_LOGIN_URL,
+  prepareSubmission,
   submitLinkFallbackUrl,
   type SubmitInput,
   type SubmitResult,
@@ -22,6 +23,7 @@ const titleInput = $<HTMLInputElement>("f-title");
 const urlInput = $<HTMLInputElement>("f-url");
 const textInput = $<HTMLTextAreaElement>("f-text");
 const titleHint = $<HTMLElement>("title-hint");
+const cleanNote = $<HTMLElement>("clean-note");
 const resultIcon = $<HTMLElement>("result-icon");
 const resultTitle = $<HTMLElement>("result-title");
 const resultDetail = $<HTMLElement>("result-detail");
@@ -114,11 +116,23 @@ async function main(): Promise<void> {
   if (params.get("u")) urlInput.value = params.get("u") ?? "";
   if (params.get("t")) titleInput.value = params.get("t") ?? "";
   if (params.get("c")) textInput.value = params.get("c") ?? "";
+  if (params.get("n")) {
+    cleanNote.hidden = false;
+    cleanNote.textContent = `Cleaned for HN: ${params.get("n")}.`;
+  }
 
   if (!fromMenu) {
     const draft = await activeTabDraft();
-    if (!urlInput.value) urlInput.value = draft.url;
-    if (!titleInput.value) titleInput.value = draft.title;
+    const prepared = prepareSubmission(
+      urlInput.value || draft.url,
+      titleInput.value || draft.title,
+    );
+    if (!urlInput.value) urlInput.value = prepared.url;
+    if (!titleInput.value) titleInput.value = prepared.title;
+    if (prepared.notes.length) {
+      cleanNote.hidden = false;
+      cleanNote.textContent = `Cleaned for HN: ${prepared.notes.join(", ")}.`;
+    }
   }
 
   const { submitMode } = await getSettings();
