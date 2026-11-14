@@ -51,20 +51,50 @@ function draftFromContext(
   };
 }
 
-function openConfirmWindow(draft: DraftSubmission): void {
+const CONFIRM_WIDTH = 440;
+const CONFIRM_HEIGHT = 620;
+
+async function openConfirmWindow(draft: DraftSubmission): Promise<void> {
   const params = new URLSearchParams({
     u: draft.url,
     t: draft.title,
     c: draft.comment,
     confirm: "1",
   });
-  chrome.windows.create({
+  const parent = await chrome.windows.getLastFocused();
+  const left =
+    parent.left != null && parent.width != null
+      ? Math.round(parent.left + (parent.width - CONFIRM_WIDTH) / 2)
+      : undefined;
+  const top =
+    parent.top != null && parent.height != null
+      ? Math.round(parent.top + (parent.height - CONFIRM_HEIGHT) / 2)
+      : undefined;
+  const win = await chrome.windows.create({
     url: chrome.runtime.getURL(`${POPUP_PAGE}?${params}`),
     type: "popup",
-    width: 440,
-    height: 620,
     focused: true,
+    left,
+    top,
   });
+  if (win.id == null) return;
+  // A window spawned from a maximized window can asynchronously transition to
+  // "maximized" after create() resolves, overriding earlier bounds. Retry until
+  // the window settles at normal state with the target size.
+  for (let i = 0; i < 15; i++) {
+    const current = await chrome.windows.get(win.id);
+    if (current.state === "normal" && current.width === CONFIRM_WIDTH) break;
+    if (current.state !== "normal") {
+      await chrome.windows.update(win.id, { state: "normal" });
+    }
+    await chrome.windows.update(win.id, {
+      width: CONFIRM_WIDTH,
+      height: CONFIRM_HEIGHT,
+      left,
+      top,
+    });
+    await new Promise((r) => setTimeout(r, 100));
+  }
 }
 
 const notificationLinks = new Map<string, string>();
@@ -131,7 +161,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         text: draft.comment,
       });
     } else {
-      openConfirmWindow(draft);
+      void openConfirmWindow(draft);
     }
   })();
 });
